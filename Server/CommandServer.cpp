@@ -1,22 +1,5 @@
 #include "CommandServer.h"
 
-void ShutDownOnBind(SOCKET ListenSocket)//DEBUG
-{
-    while (!GetAsyncKeyState(VK_F12))
-    {
-        Sleep(1);
-    }
-    ShutDown(ListenSocket);
-
-}
-
-void ShutDown(SOCKET ListenSocket)
-{
-    std::cout << "\nSERVER CLOSED.\n";
-    closesocket(ListenSocket);
-    WSACleanup();
-    exit(0);
-}
 
 int Server_Init(SOCKET& ClientSocket, SOCKET& ListenSocket)
 {
@@ -88,15 +71,7 @@ int Server_Init(SOCKET& ClientSocket, SOCKET& ListenSocket)
 
 int ExecuteCommandConsole(char* CommandBuf)
 {
-    //char Command[COMMAND_BUFLEN] = { 0 };
-    //
-    //for (int i = HEADER_SIZE; i < COMMAND_BUFLEN; i++)
-    //{
-    //    Command[i - HEADER_SIZE] = CommandBuf[i];
-    //    std::cout << " " << (int)CommandBuf[i];
-    //}
-
-    std::cout << "\nSystem: " << CommandBuf + sizeof(char) * HEADER_SIZE;
+    std::cout << "\nSystem: " << CommandBuf + sizeof(char) * HEADER_SIZE << "\n";
     system(CommandBuf + sizeof(char) * HEADER_SIZE);
     return 0;
 }

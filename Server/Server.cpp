@@ -12,8 +12,6 @@ int __cdecl main(void)
         return 0;
     }
 
-    std::thread t1(ShutDownOnBind, ListenSocket);//manual server shutdown on bind
-
 
     int iResult = 1;
 
@@ -30,7 +28,7 @@ int __cdecl main(void)
         }
         else
         {
-            printf("ACCEPT CONNECTION\n");
+          printf("ACCEPT CONNECTION\n");
         }
 
 
@@ -38,70 +36,43 @@ int __cdecl main(void)
         int recvbuflen = COMMAND_BUFLEN;
 
         // Receive until the peer shuts down the connection
-        while (iResult > 0) 
+        while (iResult > 0)
         {
-            iResult = recv(ClientSocket, recvbuf, recvbuflen, 0);
+            do
+            {
+                iResult = recv(ClientSocket, recvbuf, recvbuflen, 0);
+            } while (iResult <= 0);
 
             switch (recvbuf[0])
             {
-            case COMMAND_SHUTDOWN:
-                ShutDown(ClientSocket);
+            case COMMAND_READ:
+                std::cout << "\nSending file \"" << recvbuf + sizeof(char) * HEADER_SIZE + sizeof(' ') << "\"";//DEBUG
+                SendFile(ClientSocket, recvbuf + sizeof(char) * HEADER_SIZE + sizeof(' '));
+                break;
+
+            case COMMAND_WRITE:
+                std::cout << "\nRecieving a file";//DEBUG
+                RecvFile(ClientSocket);
                 break;
 
             case COMMAND_CONSOLE:
                 ExecuteCommandConsole(recvbuf);
                 break;
+
+            case COMMAND_EXIT:
+                std::cout << "\n[:]EXIT Command Recieved!";
+                closesocket(ClientSocket);
+                WSACleanup();
+                iResult = 0;//exit communication loop
+                break;
+
+            case COMMAND_SHUTDOWN:
+                std::cout << "\n[:]SHUTDOWN Command Recieved!";
+                ShutDown(ClientSocket);
+                break;
             }
-
-
-
-
-            //if (iResult > 0)
-            //{
-            //    printf("Bytes received: %d\n\"", iResult);
-            //
-            //    for (int i = 0; i < iResult; i++)
-            //    {
-            //        std::cout << recvbuf[i];
-            //    }
-            //    std::cout << "\"\nInput file_name: ";
-            //
-            //    std::string fileName = "hitla.mp4";//"Smiling.mkv"
-            //    //std::cin >> fileName;
-            //
-            //    if (!SendFile(ClientSocket, fileName)) { return 1; }//send file failed
-            //}
-            //else if (iResult == 0)
-            //    printf("\nConnection closed\n");
-            //else
-            //{
-            //    printf("[!]Recv Failed With Error: %d\n", WSAGetLastError());
-            //    closesocket(ClientSocket);
-            //    WSACleanup();
-            //    return 1;
-            //}
-
         }
-
-
-
-        // shutdown the connection since we're done
-        iResult = shutdown(ClientSocket, SD_SEND);
-        if (iResult == SOCKET_ERROR)
-        {
-            printf("[!]Shutdown Failed With Error: %d\n", WSAGetLastError());
-            closesocket(ClientSocket);
-            WSACleanup();
-            return 1;
-        }
-
-
-
-        // cleanup
-        closesocket(ClientSocket);
     }
 
-
-    WSACleanup();
     return 0;
 }

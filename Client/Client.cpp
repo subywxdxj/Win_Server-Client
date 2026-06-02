@@ -3,35 +3,71 @@
 
 int __cdecl main(int argc, char** argv)
 {
+    if (argc == 1)
+    {
+        char def[10];
+        std::memcpy(def, "localhost", sizeof("localhost"));
+        argc++;
+        argv[1] = def;
+    }
     SOCKET ConnectSocket = INVALID_SOCKET;
-    if (Client_Init(argc, argv, ConnectSocket))//1 = error; 0 = good
+    if (Connect_Init(argc, argv, ConnectSocket))//1 = error; 0 = good
     {
         std::cout << "\n[!]Init Failed...";
         return 0;
     }
 
-    while (true)
+    bool exit = false;
+    while (!exit)
     {
-        char Cnsl_Command[COMMAND_BUFLEN] = "B";//Shutdown
-        std::cout << "\nInput command: ";
+        char Command[COMMAND_BUFLEN];
+        std::cout << "\n" << argv[1] << ": ";
 
-        std::cin.getline(Cnsl_Command, COMMAND_BUFLEN);
+        std::cin.getline(Command, COMMAND_BUFLEN);
 
-        SendCommandConsole(ConnectSocket, Cnsl_Command);
+
+        switch (Command[0])
+        {
+        case COMMAND_READ:
+            SendCommand(ConnectSocket, Command);
+            if (Command[1] != ' ')
+            {
+                std::cout << "\nUsage: R FileName.extension";
+            }
+            else
+            {
+                std::cout << "\nSending request to recieve file \"" << Command + sizeof(char) * HEADER_SIZE << "\"";//DEBUG
+                RecvFile(ConnectSocket);
+            }
+            break;
+
+        case COMMAND_WRITE:
+            SendCommand(ConnectSocket, Command);
+            if (Command[1] != ' ')
+            {
+                std::cout << "\nUsage: R FileName.extension";
+            }
+            else
+            {
+                std::cout << "\nSending request to send file \"" << Command + sizeof(char) * HEADER_SIZE << "\"";//DEBUG
+                SendFile(ConnectSocket, Command + sizeof(char) * HEADER_SIZE) + sizeof(' ');
+            }
+            break;
+
+        case COMMAND_CONSOLE:
+            SendCommand(ConnectSocket, Command);
+            break;
+
+        case COMMAND_EXIT:
+        case COMMAND_SHUTDOWN:
+            SendCommand(ConnectSocket, Command);
+            exit = true;//close client
+            closesocket(ConnectSocket);
+            WSACleanup();
+            break;
+        }
+        
     }
-    //SendCommandShutdown(ConnectSocket);
-
-    //
-    //
-    //uint64_t FileSize;
-    //std::string FileName;
-    //
-    //if (!RecvFile(ConnectSocket)) { return -1; }//error recieving file
-    //
-    //
-    //// cleanup
-    //closesocket(ConnectSocket);
-    //WSACleanup();
 
     return 0;
 }

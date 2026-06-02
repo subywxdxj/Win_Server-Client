@@ -19,12 +19,15 @@
 #pragma comment (lib, "Mswsock.lib")
 #pragma comment (lib, "AdvApi32.lib")
 
+#define TRANSMIT_END 1
 #define TYPE_DATA 0
+#define TYPE_INFO 2
 #define COMMAND_CONSOLE 64//'@'
-#define COMMAND_SHUTDOWN 66//Execute order 66
+#define COMMAND_SHUTDOWN 66//Execute order 66 'B'
+#define COMMAND_EXIT 69//'E'
 
-#define INSTR_RECV 2
-#define INSTR_SEND 3
+#define COMMAND_READ 82//'R'
+#define COMMAND_WRITE 87//'W'
 
 
 #define HEADER_SIZE 1

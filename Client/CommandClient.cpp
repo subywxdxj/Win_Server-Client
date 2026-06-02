@@ -1,16 +1,15 @@
 #include "CommandClient.h"
 
-int Client_Init(int argc, char** argv, SOCKET& ConnectSocket)
+int Connect_Init(int argc, char** argv, SOCKET& ConnectSocket)
 {
     WSADATA wsaData;
     struct addrinfo* result = NULL,
         * ptr = NULL,
         hints;
-    const char* sendbuf = "connection established";
     int iResult;
 
     // Validate the parameters
-    if (argc != 2) 
+    if (argc != 2)
     {
         printf("usage: %s server-name\n", argv[0]);
         return 1;
@@ -71,27 +70,6 @@ int Client_Init(int argc, char** argv, SOCKET& ConnectSocket)
         return 1;
     }
 
-    // Send an initial buffer
-    //iResult = send(ConnectSocket, sendbuf, (int)strlen(sendbuf), 0);
-    //if (iResult == SOCKET_ERROR) 
-    //{
-    //    printf("[!]Send Failed With Error: %d\n", WSAGetLastError());
-    //    closesocket(ConnectSocket);
-    //    WSACleanup();
-    //    return 1;
-    //}
-    //
-    //printf("Bytes Sent: %ld\n", iResult);
-
-    // shutdown the connection since no more data will be sent
-    //iResult = shutdown(ConnectSocket, SD_SEND);
-    //if (iResult == SOCKET_ERROR) 
-    //{
-    //    printf("[!]Shutdown Failed With Error: %d\n", WSAGetLastError());
-    //    closesocket(ConnectSocket);
-    //    WSACleanup();
-    //    return 1;
-    //}
     return 0;
 }
 
@@ -107,18 +85,11 @@ int SendCommandShutdown(SOCKET& ConnectSocket)
     return 0;
 }
 
-int SendCommandConsole(SOCKET& ConnectSocket, char* Command)
+int SendCommand(SOCKET& ConnectSocket, char* Command)
 {
-    //char Buffer[COMMAND_BUFLEN];
-    //Buffer[0] = COMMAND_CONSOLE;
-    //std::memcpy(Buffer + sizeof(char) * HEADER_SIZE, Command, sizeof(Command) - sizeof(char) * HEADER_SIZE);
-    //
-    //std::cout << "Command Got: " << Command;
-    //std::cout << "Command Sent: " << Buffer;
-
     if (send(ConnectSocket, Command, COMMAND_BUFLEN, 0) == SOCKET_ERROR)
     {
-        std::cout << "\n[!]Failed SendConsoleCommand With Error: " << WSAGetLastError();
+        std::cout << "\n[!]Failed SendCommand With Error: " << WSAGetLastError();
         return 1;
     }
     return 0;
