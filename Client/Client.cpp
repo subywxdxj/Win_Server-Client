@@ -1,5 +1,7 @@
 #include "CommandClient.h"
 
+//add connection timeout for improper client disconnect
+//add folder parsing and other folder/path to file related stuff for R/W commands
 
 int __cdecl main(int argc, char** argv)
 {
@@ -36,7 +38,7 @@ int __cdecl main(int argc, char** argv)
             }
             else
             {
-                std::cout << "\nSending request to recieve file \"" << Command + sizeof(char) * HEADER_SIZE << "\"";//DEBUG
+                std::cout << "\nSending request to recieve file \"" << Command + HEADER_SIZE << "\"";//DEBUG
                 RecvFile(ConnectSocket);
             }
             break;
@@ -45,12 +47,12 @@ int __cdecl main(int argc, char** argv)
             SendCommand(ConnectSocket, Command);
             if (Command[1] != ' ')
             {
-                std::cout << "\nUsage: R FileName.extension";
+                std::cout << "\nUsage: W FileName.extension";
             }
             else
             {
-                std::cout << "\nSending request to send file \"" << Command + sizeof(char) * HEADER_SIZE << "\"";//DEBUG
-                SendFile(ConnectSocket, Command + sizeof(char) * HEADER_SIZE) + sizeof(' ');
+                std::cout << "\nSending request to send file \"" << Command + HEADER_SIZE << "\"";//DEBUG
+                SendFile(ConnectSocket, Command + HEADER_SIZE + sizeof(' '));
             }
             break;
 
@@ -65,6 +67,12 @@ int __cdecl main(int argc, char** argv)
             closesocket(ConnectSocket);
             WSACleanup();
             break;
+        default:
+            std::cout << "\nUsage:\nR FileName.extension //reads specified file from Server and sends it to Client"
+                << "\nW FileName.extension //reads specified file from Client and sends it to Server"
+                << "\n@echo test //@ followed by windows command that will be executed on the Server"
+                << "\nE //exit communication with server and Shutdown Client"
+                << "\nB //Shutdown the Server and Client\n";
         }
         
     }

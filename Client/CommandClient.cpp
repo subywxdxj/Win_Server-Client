@@ -65,7 +65,7 @@ int Connect_Init(int argc, char** argv, SOCKET& ConnectSocket)
 
     if (ConnectSocket == INVALID_SOCKET) 
     {
-        printf("Unable to connect to server!\n");
+        printf("[!]Unable to connect to server!\n");
         WSACleanup();
         return 1;
     }

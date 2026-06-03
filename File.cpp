@@ -7,7 +7,7 @@ void SocketError(SOCKET &ClientSocket)//display error code and close the socket
     WSACleanup();
 }
 
-void ShutDown(SOCKET Socket)
+void FShutDown(SOCKET Socket)
 {
     std::cout << "\nSHUTDOWN\n";
     closesocket(Socket);
@@ -44,13 +44,12 @@ bool SendFile(SOCKET& ClientSocket, std::string FileName)
     std::memcpy(sendPacket.buffer + HEADER_SIZE, &FileSize, sizeof(uint64_t));
     std::memcpy(sendPacket.buffer + HEADER_SIZE + sizeof(FileSize), FileName.c_str(), sizeof(char[255]));
 
-    iSendResult = send(ClientSocket, sendPacket.buffer, sizeof(PACKET), 0);//HEADER_SIZE + sizeof(FileSize) + FileName.length()
+    iSendResult = send(ClientSocket, sendPacket.buffer, sizeof(PACKET), 0);
     if (iSendResult == SOCKET_ERROR)
     {
         SocketError(ClientSocket);
         return 0;
     }
-    //printf("\nBytes header sent: %d\n", iSendResult);//DEBUG
 
     sendPacket.buffer[0] = TYPE_DATA;//header data
     int ByteID = HEADER_SIZE;//skip header
@@ -88,7 +87,6 @@ bool SendFile(SOCKET& ClientSocket, std::string FileName)
         SocketError(ClientSocket);
         return 0;
     }
-    //printf("\nBytes sent remainder: %d\n", iSendResult);//DEBUG
 
     return 1;
 }
@@ -97,8 +95,8 @@ bool SendFile(SOCKET& ClientSocket, std::string FileName)
 
 bool RecvFile(SOCKET &ConnectSocket)
 {
-    uint64_t FileSize;// = 520555;
-    std::string FileName;// = "hitla.mp4";
+    uint64_t FileSize;
+    std::string FileName;
 
     PACKET recvPacket;
 
@@ -106,7 +104,7 @@ bool RecvFile(SOCKET &ConnectSocket)
 
     if (recvPacket.buffer[0] != TYPE_INFO)
     {
-        std::cout << "\n[!]EXOECTED TYPE_INFO";
+        std::cout << "\n[!]EXPECTED TYPE_INFO";
         return false;
     }
 
@@ -115,13 +113,12 @@ bool RecvFile(SOCKET &ConnectSocket)
     std::memcpy(buff, recvPacket.buffer + HEADER_SIZE + sizeof(FileSize), sizeof(char[255]));
     FileName = buff;
 
-    //std::cout << "\nFileSize: " << FileSize << "\nFileName: " << FileName << "\n";//DEBUG
 
     std::ofstream SaveFile;
     int BytesRecieved = 0;
     SaveFile.open(FileName, std::ios::out | std::ios::binary);
 
-    // Receive until the peer closes the connection
+
     int remainder = FileSize % DEFAULT_DATA;
     do
     {

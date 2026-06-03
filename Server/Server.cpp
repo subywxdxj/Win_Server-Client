@@ -3,22 +3,21 @@
 
 int __cdecl main(void)
 {
-    SOCKET ClientSocket = INVALID_SOCKET;
-    SOCKET ListenSocket = INVALID_SOCKET;
-
-    if (int err = Server_Init(ClientSocket, ListenSocket))//1 = error; 0 = good
+    bool exit = false;
+    while (!exit)
     {
-        std::cout << "\n[!]Init Failed With ERROR " << err;
-        return 0;
-    }
+        SOCKET ClientSocket = INVALID_SOCKET;
+        SOCKET ListenSocket = INVALID_SOCKET;
 
+        if (int err = Server_Init(ListenSocket))//1 = error; 0 = good
+        {
+            std::cout << "\n[!]Init Failed With ERROR " << err;
+            return 0;
+        }
 
-    int iResult = 1;
-
-    while (true)
-    {
         // Accept a client socket
         ClientSocket = accept(ListenSocket, NULL, NULL);
+
         if (ClientSocket == INVALID_SOCKET)
         {
             printf("[!]Accept Failed With Error: %d\n", WSAGetLastError());
@@ -28,7 +27,8 @@ int __cdecl main(void)
         }
         else
         {
-          printf("ACCEPT CONNECTION\n");
+            printf("ACCEPT CONNECTION\n");
+            //closesocket(ListenSocket);
         }
 
 
@@ -36,6 +36,7 @@ int __cdecl main(void)
         int recvbuflen = COMMAND_BUFLEN;
 
         // Receive until the peer shuts down the connection
+        int iResult = 1;
         while (iResult > 0)
         {
             do
@@ -68,10 +69,15 @@ int __cdecl main(void)
 
             case COMMAND_SHUTDOWN:
                 std::cout << "\n[:]SHUTDOWN Command Recieved!";
-                ShutDown(ClientSocket);
+                closesocket(ClientSocket);
+                WSACleanup();
+                exit = true;//exit listen loop
+                iResult = 0;//exit communication loop
                 break;
             }
         }
+        closesocket(ListenSocket);
+        WSACleanup();
     }
 
     return 0;
