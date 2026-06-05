@@ -1,22 +1,35 @@
-#include "CommandServer.h"
-
+﻿#include "CommandServer.h"
+#include <thread>
 
 int __cdecl main(void)
 {
     bool exit = false;
-    while (!exit)
+
+    SOCKET ListenSocket = INVALID_SOCKET;
+
+    if (int err = Server_Init(ListenSocket))//1 = error; 0 = good
+    {
+        std::cout << "\n[!]Init Failed With ERROR " << err;
+        return 0;
+    }
+
+
+    DWORD dwThreadIDs[MAX_CONNECTIONS];
+    HANDLE hThreads[MAX_CONNECTIONS];
+
+    Client_Data Data[MAX_CONNECTIONS + MAX_QUEUE];//queue is only sending decline connection reasons and disconnects for now
+
+    int ThreadsCount = 0;
+
+    while (true)
     {
         SOCKET ClientSocket = INVALID_SOCKET;
-        SOCKET ListenSocket = INVALID_SOCKET;
 
-        if (int err = Server_Init(ListenSocket))//1 = error; 0 = good
-        {
-            std::cout << "\n[!]Init Failed With ERROR " << err;
-            return 0;
-        }
-
+        sockaddr_in ClientAddr;
+        int ClientAddrSz = sizeof(ClientAddr);
+        ClientAddr.sin_family = AF_INET;
         // Accept a client socket
-        ClientSocket = accept(ListenSocket, NULL, NULL);
+        ClientSocket = accept(ListenSocket, (SOCKADDR*)&ClientAddr, &ClientAddrSz);
 
         if (ClientSocket == INVALID_SOCKET)
         {
@@ -25,59 +38,66 @@ int __cdecl main(void)
             WSACleanup();
             return 1;
         }
-        else
+
+
+        char ip[10];
+        inet_ntop(ClientAddr.sin_family, &ClientAddr.sin_addr, ip, sizeof(ip));
+        int port = htons(ClientAddr.sin_port);
+
+        int ThreadID;
+        for (ThreadID = 0; ThreadID < MAX_CONNECTIONS; ThreadID++)//create a communication thread
         {
-            printf("ACCEPT CONNECTION\n");
-            //closesocket(ListenSocket);
-        }
-
-
-        char recvbuf[COMMAND_BUFLEN];
-        int recvbuflen = COMMAND_BUFLEN;
-
-        // Receive until the peer shuts down the connection
-        int iResult = 1;
-        while (iResult > 0)
-        {
-            do
+            if (Data[ThreadID].status == false)//open slot
             {
-                iResult = recv(ClientSocket, recvbuf, recvbuflen, 0);
-            } while (iResult <= 0);
+                std::cout << "ACCEPT CONNECTION N." << ThreadID
+                    << "\nIP." << ip << ":" << port << "\n";
 
-            switch (recvbuf[0])
-            {
-            case COMMAND_READ:
-                std::cout << "\nSending file \"" << recvbuf + sizeof(char) * HEADER_SIZE + sizeof(' ') << "\"";//DEBUG
-                SendFile(ClientSocket, recvbuf + sizeof(char) * HEADER_SIZE + sizeof(' '));
-                break;
+                Data[ThreadID].ClientSocket = ClientSocket;
+                Data[ThreadID].ClientAddr = ClientAddr;
+                Data[ThreadID].reason = REASON_NONE;
+                Data[ThreadID].ThreadID = ThreadID;
 
-            case COMMAND_WRITE:
-                std::cout << "\nRecieving a file";//DEBUG
-                RecvFile(ClientSocket);
-                break;
-
-            case COMMAND_CONSOLE:
-                ExecuteCommandConsole(recvbuf);
-                break;
-
-            case COMMAND_EXIT:
-                std::cout << "\n[:]EXIT Command Recieved!";
-                closesocket(ClientSocket);
-                WSACleanup();
-                iResult = 0;//exit communication loop
-                break;
-
-            case COMMAND_SHUTDOWN:
-                std::cout << "\n[:]SHUTDOWN Command Recieved!";
-                closesocket(ClientSocket);
-                WSACleanup();
-                exit = true;//exit listen loop
-                iResult = 0;//exit communication loop
+                hThreads[ThreadID] = CreateThread
+                (
+                    NULL,	//Security attributes
+                    0,		//Stack size
+                    (LPTHREAD_START_ROUTINE)Client_Accept, //Communication loop
+                    &Data[ThreadID],
+                    0,
+                    &dwThreadIDs[ThreadID]
+                );
+                std::cout << "Thread: " << dwThreadIDs[ThreadID] << "\n\n";
                 break;
             }
         }
-        closesocket(ListenSocket);
-        WSACleanup();
+
+        if (ThreadID == MAX_CONNECTIONS)//decline communication
+        {
+            for (; ThreadID < MAX_CONNECTIONS + MAX_QUEUE; ThreadID++)
+            {
+                if (Data[ThreadID].status == false)
+                {
+                    std::cout << "DECLINE CONNECTION N." << ThreadID
+                        << "\nIP." << ip << ":" << port << "\n";
+
+                    Data[ThreadID].ClientSocket = ClientSocket;
+                    Data[ThreadID].ClientAddr = ClientAddr;
+                    Data[ThreadID].reason = REASON_MAX_CONNECTIONS;
+                    Data[ThreadID].ThreadID = ThreadID;
+
+                    hThreads[ThreadID] = CreateThread
+                    (
+                        NULL,	//Security attributes
+                        0,		//Stack size
+                        (LPTHREAD_START_ROUTINE)Client_Decline,
+                        &Data[ThreadID],
+                        0,
+                        &dwThreadIDs[ThreadID]
+                    );
+                    break;
+                }
+            }
+        }
     }
 
     return 0;

@@ -30,12 +30,29 @@
 #define COMMAND_WRITE 87//'W'
 
 
+#define REASON_NONE 0 //Accept connection
+#define REASON_MAX_CONNECTIONS 1
+
+#define FILE_OPEN 0 //File Successfully open
+#define FILE_OPEN_ERR 1
+
+
 #define HEADER_SIZE 1
 
 #define DEFAULT_DATA 511
 #define COMMAND_BUFLEN 47
 #define FILE_HEAD_BUFLEN sizeof(uint64_t)/*filesize*/ + sizeof(char[255])/*filename*/
-#define DEFAULT_PORT "595"//microsoft looking port
+#define DEFAULT_PORT "595"//port
+
+struct Client_Data
+{
+    SOCKET ClientSocket;
+    sockaddr_in ClientAddr;
+
+    int reason;//0 = accept connection, 1+ = error code
+    int ThreadID;
+    bool status = false;//status of connection to this client
+};
 
 struct PACKET
 {

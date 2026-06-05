@@ -58,7 +58,10 @@ int Connect_Init(int argc, char** argv, SOCKET& ConnectSocket)
             ConnectSocket = INVALID_SOCKET;
             continue;
         }
-        break;
+        else
+        {
+            break;
+        }
     }
 
     freeaddrinfo(result);
@@ -69,6 +72,16 @@ int Connect_Init(int argc, char** argv, SOCKET& ConnectSocket)
         WSACleanup();
         return 1;
     }
+
+    char ConnectionStatus[HEADER_SIZE];
+    iResult = recv(ConnectSocket, ConnectionStatus, HEADER_SIZE, 0);
+    if (iResult && ConnectionStatus[0] != REASON_NONE)
+    {
+        std::cout << "\n[!]Connection Declined with error: " << (int)ConnectionStatus[0];
+        WSACleanup();
+        return 1;
+    }
+    std::cout << "\n[+]Connection Accepted";
 
     return 0;
 }

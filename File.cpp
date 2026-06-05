@@ -18,18 +18,24 @@ void FShutDown(SOCKET Socket)
 
 bool SendFile(SOCKET& ClientSocket, std::string FileName)
 {
-    //std::cout << "\n\nOpening a file...";
 
     std::ifstream DataFile(FileName, std::fstream::in | std::ios::binary);
-    uint64_t FileSize = std::filesystem::file_size(FileName);
+    uint64_t FileSize;
+
+    char FileStatus[HEADER_SIZE];
 
     if (DataFile.good())
     {
+        FileSize = std::filesystem::file_size(FileName);
         std::cout << "\nFile \"" << FileName << "\" successfully open";
+        FileStatus[0] = FILE_OPEN;
+        send(ClientSocket, FileStatus, HEADER_SIZE, 0);
     }
     else
     {
         std::cout << "\n[!]ERROR Opening file \"" << FileName << "\"";
+        FileStatus[0] = FILE_OPEN_ERR;
+        send(ClientSocket, FileStatus, HEADER_SIZE, 0);
         return 0;
     }
 
@@ -98,9 +104,19 @@ bool RecvFile(SOCKET &ConnectSocket)
     uint64_t FileSize;
     std::string FileName;
 
+    char FileStatus[HEADER_SIZE];
+
+    int iResult = recv(ConnectSocket, FileStatus, HEADER_SIZE, 0);
+    if (iResult && FileStatus[0] == FILE_OPEN_ERR)
+    {
+        std::cout << "\n[!]Server Error Opening file";
+        return false;
+    }
+
+
     PACKET recvPacket;
 
-    int iResult = recv(ConnectSocket, recvPacket.buffer, sizeof(PACKET), 0);
+    iResult = recv(ConnectSocket, recvPacket.buffer, sizeof(PACKET), 0);
 
     if (recvPacket.buffer[0] != TYPE_INFO)
     {

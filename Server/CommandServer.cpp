@@ -1,5 +1,79 @@
 #include "CommandServer.h"
 
+void Client_Accept(Client_Data& Data)
+{
+    char recvbuf[COMMAND_BUFLEN];
+    int recvbuflen = COMMAND_BUFLEN;
+
+    recvbuf[0] = Data.reason;
+    send(Data.ClientSocket, recvbuf, HEADER_SIZE, 0);//send accept code
+    Data.status = true;
+
+    // Receive until the peer shuts down the connection
+    int iResult = 1;
+    while (iResult > 0)
+    {
+        iResult = recv(Data.ClientSocket, recvbuf, recvbuflen, 0);
+
+        switch (recvbuf[0])
+        {
+        case COMMAND_READ:
+            std::cout << "\nSending file \"" << recvbuf + sizeof(char) * HEADER_SIZE + sizeof(' ') << "\"";//DEBUG
+            SendFile(Data.ClientSocket, recvbuf + sizeof(char) * HEADER_SIZE + sizeof(' '));
+            break;
+
+        case COMMAND_WRITE:
+            std::cout << "\nRecieving a file";//DEBUG
+            RecvFile(Data.ClientSocket);
+            break;
+
+        case COMMAND_CONSOLE:
+            ExecuteCommandConsole(recvbuf);
+            break;
+
+        case COMMAND_EXIT:
+            std::cout << "\n[+]EXIT Command Recieved!";
+            shutdown(Data.ClientSocket, SD_BOTH);
+            closesocket(Data.ClientSocket);
+            Data.status = false;
+            return;
+
+        case COMMAND_SHUTDOWN:
+            std::cout << "\n[+]SHUTDOWN Command Recieved!";
+            Data.status = false;
+            ShutDown(Data.ClientSocket);
+        }
+    }
+    char ip[10];
+    inet_ntop(Data.ClientAddr.sin_family, &Data.ClientAddr.sin_addr, ip, sizeof(ip));
+    int port = htons(Data.ClientAddr.sin_port);
+    std::cout << "\n[!]Connection unexpectedly closed by the client N." << Data.ThreadID 
+        << "\nIP." << ip << ":" << port << "\n";
+    closesocket(Data.ClientSocket);
+    Data.status = false;
+    return;
+}
+
+
+void Client_Decline(Client_Data& Data)
+{
+    char SendErrorCode[HEADER_SIZE];
+    SendErrorCode[0] = Data.reason;
+
+    send(Data.ClientSocket, SendErrorCode, HEADER_SIZE, 0);//send decline reason
+    shutdown(Data.ClientSocket, SD_BOTH);
+    closesocket(Data.ClientSocket);
+    Data.status = false;
+}
+
+
+int ShutDown(SOCKET& ClientSocket)
+{
+    std::cout << "\n[+]SERVER SHUTDOWN\n";
+    closesocket(ClientSocket);
+    WSACleanup();
+    ExitProcess(EXIT_SUCCESS);
+}
 
 int Server_Init(SOCKET& ListenSocket)
 {
