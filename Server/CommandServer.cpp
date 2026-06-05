@@ -32,7 +32,7 @@ void Client_Accept(Client_Data& Data)
             break;
 
         case COMMAND_EXIT:
-            std::cout << "\n[+]EXIT Command Recieved!";
+            std::cout << "\n[+]EXIT Command Recieved!\n";
             shutdown(Data.ClientSocket, SD_BOTH);
             closesocket(Data.ClientSocket);
             Data.status = false;
