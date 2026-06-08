@@ -19,7 +19,7 @@
 #pragma comment (lib, "Mswsock.lib")
 #pragma comment (lib, "AdvApi32.lib")
 
-#define TRANSMIT_END 1
+#define TRANSMIT_END 111
 #define TYPE_DATA 0
 #define TYPE_INFO 2
 #define COMMAND_CONSOLE 64//'@'
@@ -38,6 +38,9 @@
 
 
 #define HEADER_SIZE 1
+
+#define SEND_FILE 11
+#define SEND_FOLDER 12
 
 #define DEFAULT_DATA 511
 #define COMMAND_BUFLEN 47

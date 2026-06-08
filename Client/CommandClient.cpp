@@ -1,5 +1,69 @@
 #include "CommandClient.h"
 
+void Connect_Accept(SOCKET& ConnectSocket, char* ip)
+{
+    bool exit = false;
+    while (!exit)
+    {
+        char Command[COMMAND_BUFLEN];
+        std::cout << "\n" << ip << ": ";
+
+        std::cin.getline(Command, COMMAND_BUFLEN);
+
+        int iResult;
+
+        switch (Command[0])
+        {
+        case COMMAND_READ:
+            SendCommand(ConnectSocket, Command);
+            if (Command[1] != ' ')
+            {
+                std::cout << "\nUsage: R FileName.extension";
+            }
+            else
+            {
+                std::cout << "\nSending request to recieve file/folder \"" << Command + HEADER_SIZE << "\"";//DEBUG
+                RecvFF(ConnectSocket);
+                //RecvFile(ConnectSocket);
+            }
+            break;
+
+        case COMMAND_WRITE:
+            SendCommand(ConnectSocket, Command);
+            if (Command[1] != ' ')
+            {
+                std::cout << "\nUsage: W FileName.extension";
+            }
+            else
+            {
+                std::cout << "\nSending request to send file \"" << Command + HEADER_SIZE << "\"";//DEBUG
+                SendFF(ConnectSocket, Command + HEADER_SIZE + sizeof(' '));
+                //SendFile(ConnectSocket, Command + HEADER_SIZE + sizeof(' '));
+            }
+            break;
+
+        case COMMAND_CONSOLE:
+            SendCommand(ConnectSocket, Command);
+            break;
+
+        case COMMAND_EXIT:
+        case COMMAND_SHUTDOWN:
+            SendCommand(ConnectSocket, Command);
+            exit = true;//close client
+            closesocket(ConnectSocket);
+            WSACleanup();
+            break;
+        default:
+            std::cout << "\nUsage:\nR FileName.extension //reads specified file from Server and sends it to Client"
+                << "\nW FileName.extension //reads specified file from Client and sends it to Server"
+                << "\n@echo test //@ followed by windows command that will be executed on the Server"
+                << "\nE //exit communication with server and Shutdown Client"
+                << "\nB //Shutdown the Server and Client\n";
+        }
+    }
+    return;
+}
+
 int Connect_Init(int argc, char** argv, SOCKET& ConnectSocket)
 {
     WSADATA wsaData;

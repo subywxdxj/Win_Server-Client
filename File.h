@@ -1,9 +1,15 @@
 #pragma once
 #include "Includes.h"
 
-void SocketError(SOCKET& ClientSocket);//display error code and close the socket
-void FShutDown(SOCKET Socket);
+void SocketError(SOCKET& Socket);//display error code and close the socket
+void FShutDown(SOCKET& Socket);
 
+bool RecvFF(SOCKET& Socket);
+bool SendFF(SOCKET& Socket, std::string Path);
 
-bool SendFile(SOCKET& ClientSocket, std::string FileName);
-bool RecvFile(SOCKET& ConnectSocket);
+bool SendFile(SOCKET& Socket, std::string FileName);
+bool SendFolder(SOCKET& Socket, std::string Path, bool root);
+
+bool RecvFile(SOCKET& Socket);
+bool RecvFolder(SOCKET& Socket);
+std::string RecvFolderPath(SOCKET& Socket);

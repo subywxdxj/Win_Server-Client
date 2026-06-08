@@ -19,12 +19,14 @@ void Client_Accept(Client_Data& Data)
         {
         case COMMAND_READ:
             std::cout << "\nSending file \"" << recvbuf + sizeof(char) * HEADER_SIZE + sizeof(' ') << "\"";//DEBUG
-            SendFile(Data.ClientSocket, recvbuf + sizeof(char) * HEADER_SIZE + sizeof(' '));
+            SendFF(Data.ClientSocket, recvbuf + sizeof(char) * HEADER_SIZE + sizeof(' '));
+            //SendFile(Data.ClientSocket, recvbuf + sizeof(char) * HEADER_SIZE + sizeof(' '));
             break;
 
         case COMMAND_WRITE:
-            std::cout << "\nRecieving a file";//DEBUG
-            RecvFile(Data.ClientSocket);
+            std::cout << "\nRecieving a file/folder";//DEBUG
+            RecvFF(Data.ClientSocket);
+            //RecvFile(Data.ClientSocket);
             break;
 
         case COMMAND_CONSOLE:
