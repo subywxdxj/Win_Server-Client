@@ -13,7 +13,6 @@ int __cdecl main(void)
         return 0;
     }
 
-
     DWORD dwThreadIDs[MAX_CONNECTIONS];
     HANDLE hThreads[MAX_CONNECTIONS];
 

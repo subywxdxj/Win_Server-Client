@@ -1,15 +1,15 @@
 #pragma once
-#include "Includes.h"
+#include "Crypt.h"
 
 void SocketError(SOCKET& Socket);//display error code and close the socket
 void FShutDown(SOCKET& Socket);
 
-bool RecvFF(SOCKET& Socket);
-bool SendFF(SOCKET& Socket, std::string Path);
+bool RecvFF(SOCKET& Socket, const char keyMaster[DEFAULT_KEY]);
+bool SendFF(SOCKET& Socket, HCRYPTPROV& hCryptProv, const char keyMaster[DEFAULT_KEY], std::string Path);
 
-bool SendFile(SOCKET& Socket, std::string FileName);
-bool SendFolder(SOCKET& Socket, std::string Path, bool root);
+bool SendFile(SOCKET& Socket, HCRYPTPROV& hCryptProv, std::string FileName, const char keyMaster[DEFAULT_KEY]);
+bool SendFolder(SOCKET& Socket, HCRYPTPROV& hCryptProv, const char keyMaster[DEFAULT_KEY], std::string Path, bool root);
 
-bool RecvFile(SOCKET& Socket);
-bool RecvFolder(SOCKET& Socket);
-std::string RecvFolderPath(SOCKET& Socket);
+bool RecvFile(SOCKET& Socket, const char keyMaster[DEFAULT_KEY]);
+bool RecvFolder(SOCKET& Socket, const char keyMaster[DEFAULT_KEY]);
+std::string RecvFolderPath(SOCKET& Socket, const char keyMaster[DEFAULT_KEY]);

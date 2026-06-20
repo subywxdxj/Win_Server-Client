@@ -4,6 +4,7 @@
 #include <windows.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#include <wincrypt.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -37,15 +38,18 @@
 #define FILE_OPEN_ERR 1
 
 
-#define HEADER_SIZE 1
-
 #define SEND_FILE 11
 #define SEND_FOLDER 12
 
-#define DEFAULT_DATA 511
+#define HEADER_SIZE 1
+#define DEFAULT_DATA 255
+#define DEFAULT_KEY 256
+#define DEFAULT_PACKET 256
+#define DEFAULT_PACKET_CRYPT 512
 #define COMMAND_BUFLEN 47
-#define FILE_HEAD_BUFLEN sizeof(uint64_t)/*filesize*/ + sizeof(char[255])/*filename*/
+#define FILE_HEAD_BUFLEN sizeof(uint64_t)/*filesize*/ + sizeof(char[256])/*filename*/
 #define DEFAULT_PORT "595"//port
+
 
 struct Client_Data
 {
