@@ -29,7 +29,7 @@ I had fun, it's not secure.<br />
 Both Client and Server are enrypting sensetive data such as Commands and Files/Folders with randomly generated key the size of the message itself (up to 256 bytes), the random key is included into the message while encrypted with Symmetric Master Key (the copy of which is hardcoded into both parties).<br />
 Data will be encrypted (besides 1 byte operation status packets) but that still leaves possibility for MITM attack as you can simply copy old encrypted requests for server to perform certain action.<br />
 Encryption itself is probaly silly as I don't know much about cryptography<br />
-//xor data with key and key << 256<br />
+//in this case '^' means "xor data with key and key << 256"<br />
 //         [(1      + 255 )      + 256      ] = 512<br />
 //packet - [(header + data)^keyR + keyR^keyM]<br />
 At least it's more fun than blindly copying AES or smth :)
