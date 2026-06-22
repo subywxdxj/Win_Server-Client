@@ -1,5 +1,8 @@
 # Windows Server & Client application for transmitting data<br />
-Access via console (which is automatically generated with default/test parameters if not launched throught cmd)<br /><br />
+Access via console (which is automatically generated with default/test parameters if not launched throught cmd)
+<br />
+Server can handle "MAX_CONNECTIONS" amount of clients, limited by amount of thread you can create
+<br /><br />
 # Usage:
 1) Launch the server (no parameters for now)
 2) Launch the client (1 parameter - ip, defaults to localhost or "getkey" for new Master key in text form)
