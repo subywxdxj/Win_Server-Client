@@ -264,7 +264,7 @@ bool RecvFile(SOCKET& Socket, const char keyMaster[DEFAULT_KEY])
     std::memcpy(buff, recvPacket + HEADER_SIZE + sizeof(FileSize), (DEFAULT_PACKET - HEADER_SIZE - sizeof(FileSize)));
     FileName = buff;
 
-    std::cout << "\nRecv File: " << FileName;//DEBUG
+    std::cout << "\nRecv File: " << FileName << " | Size: " << FileSize;//DEBUG
 
 
     std::ofstream SaveFile;
@@ -274,38 +274,42 @@ bool RecvFile(SOCKET& Socket, const char keyMaster[DEFAULT_KEY])
 
     int remainder = FileSize % DEFAULT_DATA;
 
-    do
+    if (FileSize > 0)
     {
-        if (BytesRecieved + DEFAULT_DATA + HEADER_SIZE >= FileSize)
+        do
         {
-            recvPacket = recvCrypt(Socket, keyMaster, remainder + HEADER_SIZE, 0, iResult);
-        }
-        else
-        {
-            recvPacket = recvCrypt(Socket, keyMaster, DEFAULT_PACKET, 0, iResult);
-        }
-        if (iResult > 0)
-        {
-            BytesRecieved += iResult-1;
-            for (int i = HEADER_SIZE; i < iResult; i++)
+            if (BytesRecieved + DEFAULT_DATA + HEADER_SIZE >= FileSize)
             {
-                SaveFile << recvPacket[i];
+                recvPacket = recvCrypt(Socket, keyMaster, remainder + HEADER_SIZE, 0, iResult);
             }
-        }
-        else if (iResult == 0)
-        {
-            printf("Connection closed\n");
-            SaveFile.close();
-            return 0;
-        }
-        else
-        {
-            printf("recv failed with error: %d\n", WSAGetLastError()); 
-            SaveFile.close();
-            return 0;
-        }
+            else
+            {
+                recvPacket = recvCrypt(Socket, keyMaster, DEFAULT_PACKET, 0, iResult);
+            }
+            if (iResult > 0)
+            {
+                BytesRecieved += iResult - 1;
+                for (int i = HEADER_SIZE; i < iResult; i++)
+                {
+                    SaveFile << recvPacket[i];
+                }
+                std::cout << "\nRecv " << iResult << "B (" << BytesRecieved << "/" << FileSize << ")";//DEBUG
+            }
+            else if (iResult == 0)
+            {
+                printf("Connection closed\n");
+                SaveFile.close();
+                return 0;
+            }
+            else
+            {
+                printf("recv failed with error: %d\n", WSAGetLastError());
+                SaveFile.close();
+                return 0;
+            }
 
-    } while (iResult > 0 && recvPacket[0] == TYPE_DATA);
+        } while (iResult > 0 && recvPacket[0] == TYPE_DATA);
+    }
 
 
     SaveFile.close();
