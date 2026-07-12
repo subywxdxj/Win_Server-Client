@@ -1,4 +1,4 @@
-#include "Includes.h"
+#include "Includes.hpp"
 
 char* Crypt(const char* data, const char* key, int size);
 const char* CryptPacket(const char* data, const char keyRand[DEFAULT_KEY], const char keyMaster[DEFAULT_KEY], int size);

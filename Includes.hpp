@@ -37,7 +37,6 @@
 #define FILE_OPEN 0 //File Successfully open
 #define FILE_OPEN_ERR 1
 
-
 #define SEND_FILE 11
 #define SEND_FOLDER 12
 

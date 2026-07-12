@@ -1,4 +1,6 @@
-#include "../File.h"
+#include "../Send.hpp"
+
+
 #define MAX_CONNECTIONS 2
 #define MAX_QUEUE 2
 

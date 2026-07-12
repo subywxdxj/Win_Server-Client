@@ -1,4 +1,4 @@
-#include "CommandClient.h"
+#include "CommandClient.hpp"
 
 int __cdecl main(int argc, char** argv)
 {

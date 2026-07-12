@@ -1,4 +1,4 @@
-#include "CommandClient.h"
+#include "CommandClient.hpp"
 
 void Connect_Accept(SOCKET& ConnectSocket, char* ip)
 {

@@ -8,11 +8,6 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Client", "Client\Client.vcxproj", "{7D3B1EEC-642B-48FA-8029-5C50106E0135}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D65733BB-8666-4CBC-9EFA-B2C3AD110C71}"
-	ProjectSection(SolutionItems) = preProject
-		File.cpp = File.cpp
-		File.h = File.h
-		Includes.h = Includes.h
-	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
