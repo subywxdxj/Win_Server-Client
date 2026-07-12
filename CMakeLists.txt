@@ -5,5 +5,7 @@ ADD_DEFINITIONS(-DUNICODE)
 
 project(Client-Server)
 
-add_executable(Client Client/Client.cpp Client/CommandClient.cpp Client/CommandClient.h File.cpp File.h Crypt.cpp Crypt.h Includes.h)
-add_executable(Server Server/Server.cpp Server/CommandServer.cpp Server/CommandServer.h File.cpp File.h Crypt.cpp Crypt.h Includes.h)
+file(GLOB ROOT CONFIGURE_DEPENDS *.cpp *.hpp)
+
+add_executable(Client Client/Client.cpp Client/CommandClient.cpp Client/CommandClient.hpp ${ROOT})
+add_executable(Server Server/Server.cpp Server/CommandServer.cpp Server/CommandServer.hpp ${ROOT})
